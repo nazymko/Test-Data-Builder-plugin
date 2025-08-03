@@ -1,0 +1,65 @@
+<idea-plugin>
+    <id>com.testdata.supplier.generator</id>
+    <vendor>Andrew</vendor>
+    <name>Test Data Builder [Ctrl+Shift+S]</name>
+    <description>
+        <![CDATA[
+  <h2>Test Data Builder — implementation of Test Data Builder Pattern</h2>
+  <p><b>Test Data Builder</b> is an IntelliJ IDEA plugin that automatically generates <b>Supplier</b> test data providers for your Java classes. It streamlines the creation of test data objects using builder patterns, constructor injection, or setters.</p>
+
+  <p><b>Hotkey:</b> [Ctrl+Shift+S]</p>
+
+  <h3>What is the Test Data Builder Pattern?</h3>
+  <p>The <b>Test Data Builder</b> pattern is a design pattern used in unit testing to construct complex test objects in a readable and flexible way. It provides sensible defaults and lets you override only the necessary fields. This approach avoids verbose object construction and keeps your tests clean, maintainable, and expressive.</p>
+  <p>For example, instead of manually creating a deeply nested object with multiple arguments, you can use a fluent builder-like supplier that pre-fills default values:</p>
+  <pre><code>MyClass instance = MyClassSupplier.configuredBuilder()
+    .withField1("test value")
+    .withField2(42)
+    .build();
+</code></pre>
+
+  <h3>Features</h3>
+  <ul>
+    <li>Generate Supplier classes for any Java POJO or DTO.</li>
+    <li>Recursively resolve and generate suppliers for nested custom types.</li>
+    <li>Detect known types (e.g., <code>String</code>, <code>List</code>, <code>Optional</code>) with randomized default values.</li>
+    <li>Option to generate all suppliers in a single package or preserve the original class package structure.</li>
+    <li>Supports Lombok, builder patterns, and constructor injection.</li>
+    <li>Automatically manages imports and avoids name collisions.</li>
+    <li>Configurable for test vs. main source sets.</li>
+  </ul>
+
+  <h3>Usage</h3>
+  <p>Right-click any Java class in the project and select <b>Generate Supplier</b> from the context menu. Customize generation options, and the plugin will create the corresponding supplier classes.</p>
+
+  <p>This generated supplier can be used in tests to quickly create fully initialized instances of your classes.</p>
+
+  <h3>Ideal For</h3>
+  <ul>
+    <li>Unit tests with pre-configured POJOs.</li>
+    <li>Sample data for integration or property-based tests.</li>
+    <li>Reducing boilerplate when working with complex object graphs.</li>
+  </ul>
+]]>
+    </description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <actions>
+        <action id="GenerateSupplierAction"
+                class="com.testdata.suppliergen.v2.GenerateSupplierAction"
+                text="Generate Supplier Class"
+                description="Generate a *Supplier class for the class under caret">
+
+            <!-- Show in editor right-click menu -->
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <!-- Optional: also show in the project view right-click -->
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <!-- Windows/Linux -->
+            <keyboard-shortcut first-keystroke="ctrl shift S" keymap="$default"/>
+            <!-- macOS -->
+            <keyboard-shortcut first-keystroke="meta shift S" keymap="Mac OS X"/>
+        </action>
+    </actions>
+</idea-plugin>

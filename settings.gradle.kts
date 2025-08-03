@@ -1,0 +1,1 @@
+rootProject.name = "Test Data Supply Pattern Generator"
