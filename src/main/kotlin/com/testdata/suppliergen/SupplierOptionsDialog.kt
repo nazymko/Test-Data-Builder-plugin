@@ -1,7 +1,5 @@
 package com.testdata.suppliergen
 
-import ai.grazie.utils.attributes.value
-import com.testdata.suppliergen.model.InstantiationMode
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.DialogWrapper
@@ -13,6 +11,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.ui.FormBuilder
+import com.testdata.suppliergen.model.InstantiationMode
 import org.jetbrains.jps.model.java.JavaSourceRootType
 import javax.swing.*
 

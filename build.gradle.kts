@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
-    id("org.jetbrains.intellij.platform") version "2.5.0" // ✅ keep only this one
+    id("org.jetbrains.intellij.platform") version "2.7.0"
 }
 
 group = "com.example"
@@ -19,7 +19,7 @@ repositories {
 dependencies {
     intellijPlatform {
         // IntelliJ Community Edition
-        create("IC", "2025.1")
+        create("IC", "2023.1")
 
         // Needed to access PSI, PsiClass, etc.
         bundledPlugin("com.intellij.java")
@@ -32,7 +32,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "251"
+            sinceBuild = "230"
         }
 
         changeNotes = """
@@ -43,11 +43,11 @@ intellijPlatform {
 
 tasks {
     withType<JavaCompile> {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
+        sourceCompatibility = "11"
+        targetCompatibility = "11"
     }
 
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
     }
 }

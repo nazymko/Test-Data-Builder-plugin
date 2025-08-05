@@ -1,18 +1,17 @@
 package com.testdata.suppliergen.generator.sections
 
-import com.testdata.suppliergen.generator.SectionBuilder
-import com.testdata.suppliergen.model.FieldModel
-import com.testdata.suppliergen.model.SupplierClassModel
 import com.intellij.psi.PsiClassType
+import com.testdata.suppliergen.generator.SectionBuilder
+import com.testdata.suppliergen.model.SupplierClassModel
 
 class ImportSection : SectionBuilder {
     override fun render(model: SupplierClassModel): String {
         val baseImports = sequenceOf(
             "java.util.function.Supplier",
-            "org.assertj.core.api.Assertions",
             "lombok.Data",
             "lombok.Builder",
-            "javax.annotation.processing.Generated"
+            "javax.annotation.processing.Generated",
+            "static org.assertj.core.api.Assertions.assertThat"
         )
 
         val targetClassImport = if (model.packageName.isNotBlank()) {
@@ -71,7 +70,7 @@ class ImportSection : SectionBuilder {
         val finalImports = allImports.filterNot { it.substringAfterLast('.') in simpleNamesWithCollision }
 
         // Step 5: Format imports
-        return finalImports
+        val joinedImports = finalImports
             .filter { it.isNotBlank() }
             .filter { it.contains('.') } // Exclude raw types like "List" or "Map"
             .map { it.trim() }
@@ -80,5 +79,6 @@ class ImportSection : SectionBuilder {
             .distinct()
             .sorted()
             .joinToString(separator = "\n", postfix = "\n\n") { "import $it;" }
+        return joinedImports
     }
 }

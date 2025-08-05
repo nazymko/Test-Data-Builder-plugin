@@ -2,6 +2,7 @@
     <id>com.testdata.supplier.generator</id>
     <vendor>Andrew</vendor>
     <name>Test Data Builder [Ctrl+Shift+S]</name>
+    <idea-version since-build="230"/>
     <description>
         <![CDATA[
   <h2>Test Data Builder — implementation of Test Data Builder Pattern</h2>

@@ -19,7 +19,7 @@ class ClassHeaderSection : SectionBuilder {
         @Generated(
             value = "${info.name} v${info.version}",
             date = "$timestamp", 
-            comments = "Auto-generated supplier for ${model.targetClassName} by Andrew's '${info.name}' plugin. Source: ${model.targetQualifiedName}"
+            comments = "Auto-generated supplier for ${model.targetClassName} class by Andrew's '${info.name}' plugin. Source: ${model.targetQualifiedName}"
         )
         public class ${model.supplierClassName} implements Supplier<${model.targetClassName}> {
     """.trimIndent() + "\n"

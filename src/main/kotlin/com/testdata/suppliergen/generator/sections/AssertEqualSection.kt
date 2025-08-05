@@ -6,7 +6,7 @@ import com.testdata.suppliergen.model.SupplierClassModel
 class AssertEqualSection : SectionBuilder {
     override fun render(model: SupplierClassModel): String {
         val lines = model.fields.joinToString("\n") {
-            "           Assertions.assertThat(expected.${it.getter}()).isEqualTo(actual.${it.getter}());"
+            "           assertThat(expected.${it.getter}()).isEqualTo(actual.${it.getter}());"
         }
         return """
         
