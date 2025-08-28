@@ -9,7 +9,6 @@ class AssertEqualSection : SectionBuilder {
             "           assertThat(expected.${it.getter}()).isEqualTo(actual.${it.getter}());"
         }
         return """
-        
         public static void assertEqual(${model.targetClassName} expected, ${model.targetClassName} actual) {
 $lines
         }
