@@ -15,7 +15,7 @@ object FieldModelFactory {
     fun from(field: PsiField): FieldModel {
         val psiType = field.type
         val fqName = FqNameTypeResolver.canonicalClassNameToFqName(psiType)
-        val handler = TypeHandlerRegistry.resolve(fqName, psiType, "FieldModelFactory field type")
+        val handler = TypeHandlerRegistry.resolve(field.name, fqName, psiType, "FieldModelFactory field type")
 
         val name = field.name
         val type = psiType.presentableText

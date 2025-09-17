@@ -1,12 +1,40 @@
 package com.testdata.suppliergen.types
 
 import com.testdata.suppliergen.types.contract.TypeHandler
+import com.testdata.suppliergen.types.contract.PatternBasedTypeHandler
 import com.testdata.suppliergen.types.impl.*
 import com.testdata.suppliergen.types.impl.collections.*
 import com.testdata.suppliergen.types.impl.maps.*
+import com.testdata.suppliergen.types.impl.patterns.*
 import com.intellij.psi.PsiType
 
 object TypeHandlerRegistry {
+    // Pattern-based handlers - these should be checked first and sorted by priority
+    private val patternBasedHandlers: List<PatternBasedTypeHandler> = listOf(
+        // Financial & Identity (Highest Priority)
+        CreditCardTypeHandler,          // 16
+        SSNTypeHandler,                 // 15
+        PhoneTypeHandler,               // 14
+        PersonalInfoTypeHandler,        // 13
+        IBANTypeHandler,                // 12
+        GenderTypeHandler,              // 11
+        EmailTypeHandler,               // 10
+
+        // Professional & Business
+        JobTitleTypeHandler,            // 9
+        SalaryTypeHandler,              // 9
+        CompanyTypeHandler,             // 8
+        CurrencyTypeHandler,            // 8
+        DepartmentTypeHandler,          // 7
+        NameTypeHandler,                // 7
+
+        // Geographic & Technical
+        CoordinateTypeHandler,          // 6
+        AddressTypeHandler,             // 6
+        IPAddressTypeHandler,           // 5
+        UuidTypeHandler                 // 4
+    ).sortedByDescending { it.priority }
+
     private val handlers: List<TypeHandler> = listOf(
         StringHandler,
         BigDecimalHandler,
@@ -64,6 +92,25 @@ object TypeHandlerRegistry {
 
     // Cache helper instance
     private val cacheHelper = CacheHelper()
+
+    /**
+     * Resolve a type handler considering field name patterns for semantic data generation
+     */
+    fun resolve(fieldName: String?, fqName: String?, psiType: PsiType?, desc: String?): TypeHandler {
+        // First check pattern-based handlers if we have a field name
+        if (!fieldName.isNullOrBlank()) {
+            val patternHandler = patternBasedHandlers.firstOrNull {
+                it.supportsFieldName(fieldName, fqName, psiType)
+            }
+            if (patternHandler != null) {
+                println("Field '$fieldName' matched pattern handler: $patternHandler")
+                return patternHandler
+            }
+        }
+
+        // Fall back to regular type-based resolution
+        return resolve(fqName, psiType, desc)
+    }
 
     fun resolve(fqName: String?, psiType: PsiType?, desc: String?): TypeHandler {
         val result: TypeHandler

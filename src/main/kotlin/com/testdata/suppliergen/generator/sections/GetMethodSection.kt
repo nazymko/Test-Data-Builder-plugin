@@ -174,9 +174,6 @@ class GetMethodSection : SectionBuilder {
 
     // Helper to get map collector with merge function and map factory
     private fun getMapCollectorWithMerge(f: FieldModel, keyMapper: String, valueMapper: String): String {
-        // Debug logging to see what types we're dealing with
-        println("DEBUG: Field ${f.name} - type: '${f.type}', fqType: '${f.fqType}', mapRawType: '${f.mapRawType}'")
-
         val mapType = when {
             f.type.contains("LinkedHashMap") -> "java.util.LinkedHashMap::new"
             f.type.contains("ConcurrentHashMap") -> "java.util.concurrent.ConcurrentHashMap::new"
@@ -202,7 +199,6 @@ class GetMethodSection : SectionBuilder {
             else -> "java.util.HashMap::new"
         }
 
-        println("DEBUG: Selected mapType: $mapType")
         return "java.util.stream.Collectors.toMap(entry -> $keyMapper, entry -> $valueMapper, (existing, replacement) -> replacement, $mapType)"
     }
 
