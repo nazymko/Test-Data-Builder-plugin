@@ -15,8 +15,8 @@ class FieldSection(private val useFqNames: Boolean = true) : SectionBuilder {
 
     private fun renderField(field: FieldModel): String {
         return when {
-            field.isOptional && field.isKnown -> renderKnownOptionalField(field)
-            field.isOptional && !field.isKnown -> renderUnknownOptionalField(field)
+            field.isOptional && field.optionalInnerIsKnown -> renderKnownOptionalField(field)
+            field.isOptional && !field.optionalInnerIsKnown -> renderUnknownOptionalField(field)
             field.isCollection && field.elementIsKnown -> renderKnownCollectionField(field)
             field.isCollection && !field.elementIsKnown -> renderUnknownCollectionField(field)
             field.isMap -> renderMapField(field) // Simplified to single map handling method
@@ -45,8 +45,9 @@ class FieldSection(private val useFqNames: Boolean = true) : SectionBuilder {
     private fun renderUnknownOptionalField(field: FieldModel): String {
         val innerType =
             if (useFqNames) field.optionalInnerFqType ?: field.optionalInnerType else field.optionalInnerType
-        val builderType = "${innerType}Supplier.${innerType}SupplierBuilder"
-        return "    private Optional<$builderType> ${field.name};"
+        val innerSimpleName = field.optionalInnerType // Always use simple name for builder type
+        val builderType = "${innerType}Supplier.${innerSimpleName}SupplierBuilder"
+        return "    private $builderType ${field.name};"
     }
 
     private fun renderKnownCollectionField(field: FieldModel): String {
@@ -58,6 +59,7 @@ class FieldSection(private val useFqNames: Boolean = true) : SectionBuilder {
         val raw = field.collectionRawType ?: "java.util.List"
         val elemType =
             if (useFqNames) field.elementFqType ?: field.elementPresentableType else field.elementPresentableType
+        // Store as List<BuilderType> so builders can be modified later
         val builderType = "${elemType}Supplier.${field.elementPresentableType}SupplierBuilder"
         return "    private $raw<$builderType> ${field.name};"
     }

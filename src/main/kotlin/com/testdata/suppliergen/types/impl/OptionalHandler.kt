@@ -13,13 +13,20 @@ object OptionalHandler : TypeHandler {
 
     override fun defaultValue(fieldName: String, fqName: String?, psiType: PsiType?): String {
         val innerTypeFqName = extractOptionalInnerType(fqName)
+        val innerType = extractGenericType(psiType)
         val innerHandler = TypeHandlerRegistry.resolve(
             innerTypeFqName,
-            psiType, "OptionalHandler defaultValue"
+            innerType, "OptionalHandler defaultValue"
         )
 
-        val defaultInnerValue = innerHandler.defaultValue(fieldName, innerTypeFqName, psiType)
-        return "Optional.of($defaultInnerValue)"
+        return if (innerHandler.isKnown) {
+            // For known types, wrap with Optional
+            val defaultInnerValue = innerHandler.defaultValue(fieldName, innerTypeFqName, innerType)
+            "Optional.of($defaultInnerValue)"
+        } else {
+            // For unknown types, return unwrapped builder (will be wrapped in get method)
+            "${innerTypeFqName ?: "Object"}Supplier.configuredBuilder()"
+        }
     }
 
     fun extractOptionalInnerType(fqName: String?): String? {
@@ -35,8 +42,14 @@ object OptionalHandler : TypeHandler {
         val innerFqName = (innerType as? PsiClassType)?.resolve()?.qualifiedName
         val innerHandler = TypeHandlerRegistry.resolve(innerFqName, innerType, "OptionalHandler randomizedValue")
 
-        val innerValue = innerHandler.defaultValue(fieldName, innerFqName, innerType)
-        return "Optional.ofNullable($innerValue)"
+        return if (innerHandler.isKnown) {
+            // For known types, wrap with Optional
+            val innerValue = innerHandler.randomizedValue(fieldName, innerFqName, innerType)
+            "Optional.ofNullable($innerValue)"
+        } else {
+            // For unknown types, return unwrapped builder (will be wrapped in get method)
+            "${innerFqName ?: "Object"}Supplier.configuredBuilder()"
+        }
     }
 
     private fun extractGenericType(psiType: PsiType?): PsiType {

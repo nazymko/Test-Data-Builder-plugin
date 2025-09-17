@@ -71,6 +71,16 @@ class GetMethodSection : SectionBuilder {
     // Helper to generate the correct value expression for a field
     private fun valueExprForField(f: FieldModel): String {
         return when {
+            f.isOptional && f.optionalInnerIsKnown -> {
+                // Known Optional field - use as is
+                f.name
+            }
+
+            f.isOptional && !f.optionalInnerIsKnown -> {
+                // Unknown Optional field - wrap the built supplier with Optional
+                "${f.name} != null ? Optional.of(${f.name}.build().get()) : Optional.empty()"
+            }
+
             f.isMap -> {
                 // Handle maps based on key/value known status
                 handleMapField(f)
@@ -164,14 +174,45 @@ class GetMethodSection : SectionBuilder {
 
     // Helper to get map collector with merge function and map factory
     private fun getMapCollectorWithMerge(f: FieldModel, keyMapper: String, valueMapper: String): String {
+        // Debug logging to see what types we're dealing with
+        println("DEBUG: Field ${f.name} - type: '${f.type}', fqType: '${f.fqType}', mapRawType: '${f.mapRawType}'")
+
         val mapType = when {
-            f.type.contains("HashMap") -> "java.util.HashMap::new"
-            f.type.contains("TreeMap") -> "java.util.TreeMap::new"
             f.type.contains("LinkedHashMap") -> "java.util.LinkedHashMap::new"
+            f.type.contains("ConcurrentHashMap") -> "java.util.concurrent.ConcurrentHashMap::new"
+            f.type.contains("TreeMap") -> "java.util.TreeMap::new"
+            f.type.contains("HashMap") -> "java.util.HashMap::new"
+            f.type.contains("EnumMap") -> {
+                return getEnumMapCollector(f, keyMapper, valueMapper)
+            }
+            f.fqType?.contains("LinkedHashMap") == true -> "java.util.LinkedHashMap::new"
+            f.fqType?.contains("ConcurrentHashMap") == true -> "java.util.concurrent.ConcurrentHashMap::new"
+            f.fqType?.contains("TreeMap") == true -> "java.util.TreeMap::new"
+            f.fqType?.contains("HashMap") == true -> "java.util.HashMap::new"
+            f.fqType?.contains("EnumMap") == true -> {
+                return getEnumMapCollector(f, keyMapper, valueMapper)
+            }
+            f.mapRawType?.contains("LinkedHashMap") == true -> "java.util.LinkedHashMap::new"
+            f.mapRawType?.contains("ConcurrentHashMap") == true -> "java.util.concurrent.ConcurrentHashMap::new"
+            f.mapRawType?.contains("TreeMap") == true -> "java.util.TreeMap::new"
+            f.mapRawType?.contains("HashMap") == true -> "java.util.HashMap::new"
+            f.mapRawType?.contains("EnumMap") == true -> {
+                return getEnumMapCollector(f, keyMapper, valueMapper)
+            }
             else -> "java.util.HashMap::new"
         }
 
+        println("DEBUG: Selected mapType: $mapType")
         return "java.util.stream.Collectors.toMap(entry -> $keyMapper, entry -> $valueMapper, (existing, replacement) -> replacement, $mapType)"
+    }
+
+    // Special handling for EnumMap which requires the enum class in constructor
+    private fun getEnumMapCollector(f: FieldModel, keyMapper: String, valueMapper: String): String {
+        // For EnumMap, we use the three-parameter collect method with Supplier, BiConsumer, BiConsumer
+        return "java.util.stream.Collector.of(" +
+                "() -> new java.util.EnumMap(${f.name}), " +
+                "(map, entry) -> map.put($keyMapper, $valueMapper), " +
+                "(map1, map2) -> { map1.putAll(map2); return map1; })"
     }
     /**
      * Returns the appropriate collector based on the map type to preserve the original map structure
@@ -180,6 +221,10 @@ class GetMethodSection : SectionBuilder {
         val mapType = f.mapRawType ?: f.fqType?.substringBefore('<') ?: ""
 
         return when {
+            mapType.contains("EnumMap") -> {
+                getEnumMapCollector(f, keyMapper, valueMapper)
+            }
+
             mapType.contains("SortedMap") || mapType.contains("TreeMap") -> {
                 "java.util.stream.Collectors.toMap(" +
                         "entry -> $keyMapper, " +

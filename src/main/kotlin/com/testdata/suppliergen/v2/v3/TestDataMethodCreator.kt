@@ -18,7 +18,8 @@ class TestDataMethodCreator {
     fun getMethodName(supplierFile: PsiJavaFile): String {
         val supplierSimpleClassName = supplierFile.name.removeSuffix(".java")
         val classNameToUse = supplierSimpleClassName.removeSuffix("Supplier")
-        return classNameToUse + "ConfiguredBuilder"
+        val methodName = classNameToUse + "ConfiguredBuilder"
+        return methodName.replaceFirstChar { it.lowercase() }
     }
 
     fun createSupplierMethod(testDataClass: PsiClass, supplierFile: PsiJavaFile): PsiMethod {
