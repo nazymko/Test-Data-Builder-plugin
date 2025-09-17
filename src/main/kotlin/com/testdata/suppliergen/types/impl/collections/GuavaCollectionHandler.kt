@@ -74,7 +74,9 @@ object GuavaCollectionHandler : BaseCollectionHandler() {
         return if (elementHandler.isKnown) {
             elementHandler.defaultValue(fieldName, elementFq, elementType)
         } else {
-            "${elementType.presentableText}Supplier.configuredBuilder()"
+            // Use elementFq if available, otherwise use the presentableText
+            val elementTypeName = elementFq ?: elementType.presentableText
+            "${elementTypeName}Supplier.configuredBuilder()"
         }
     }
 

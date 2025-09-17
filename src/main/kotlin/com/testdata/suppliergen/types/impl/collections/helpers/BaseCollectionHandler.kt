@@ -126,7 +126,10 @@ abstract class BaseCollectionHandler : TypeHandler {
         return if (elementHandler.isKnown) {
             elementHandler.defaultValue(fieldName, elementFq, elementType)
         } else {
-            "${elementType.presentableText}Supplier.configuredBuilder()"
+            // Return builder for complex types (stored as builders in supplier fields)
+            // Use elementFq if available, otherwise use the presentableText
+            val elementTypeName = elementFq ?: elementType.presentableText
+            "${elementTypeName}Supplier.configuredBuilder()"
         }
     }
 }

@@ -8,7 +8,7 @@ object BitSetHandler : TypeHandler {
     override val supportedTypes: Set<String> = setOf("java.util.BitSet", "BitSet")
 
     override fun defaultValue(fieldName: String, fqName: String?, psiType: PsiType?): String =
-        "new java.util.BitSet<>()"
+        "new java.util.BitSet()"
 
     override val staticExtraImports: Set<String> get() = setOf("java.util.BitSet")
 }

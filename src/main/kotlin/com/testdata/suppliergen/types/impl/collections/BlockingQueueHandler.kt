@@ -8,7 +8,7 @@ object BlockingQueueHandler : CommonCollectionHandler() {
     override val supportedTypes: Set<String> = setOf("java.util.concurrent.BlockingQueue", "BlockingQueue")
 
     override fun defaultValue(fieldName: String, fqName: String?, psiType: PsiType?): String =
-        "new java.util.concurrent.BlockingQueue<>()"
+        "new java.util.concurrent.LinkedBlockingQueue<>()"
 
     override val staticExtraImports: Set<String> get() = setOf("java.util.concurrent.BlockingQueue")
 }

@@ -153,19 +153,39 @@ object CollectionHandler : CommonCollectionHandler() {
             val rawType = parseType.rawType
             val generics = parseType.generics
             return when (generics.size) {
-                0 -> "new $factoryType<>()"
+                0 -> getDefaultConstructor(factoryType)
                 1 -> handleSingleGenericCollection(factoryType, null, fieldName, parseType)
                 2 -> handleDoubleGenericCollection(factoryType, null, null, fieldName, parseType)
-                else -> "new $factoryType<>()"
+                else -> getDefaultConstructor(factoryType)
             }
         } else {
-            val generics = (psiType as? PsiClassType)?.parameters ?: return "new $factoryType<>()"
+            val generics = (psiType as? PsiClassType)?.parameters ?: return getDefaultConstructor(factoryType)
             return when (generics.size) {
-                0 -> "new $factoryType<>()"
+                0 -> getDefaultConstructor(factoryType)
                 1 -> handleSingleGenericCollection(factoryType, generics[0], fieldName, parseType)
                 2 -> handleDoubleGenericCollection(factoryType, generics[0], generics[1], fieldName, parseType)
-                else -> "new $factoryType<>()"
+                else -> getDefaultConstructor(factoryType)
             }
+        }
+    }
+
+    private fun getDefaultConstructor(factoryType: String): String {
+        return when {
+            // Non-generic types that don't support diamond operator
+            factoryType == "java.util.BitSet" -> "new java.util.BitSet()"
+            factoryType == "java.util.Properties" -> "new java.util.Properties()"
+            factoryType.startsWith("java.util.concurrent.ArrayBlockingQueue") -> "new java.util.concurrent.ArrayBlockingQueue<>(16)"
+            factoryType.contains("BlockingQueue") -> {
+                // BlockingQueue is abstract, use concrete implementation
+                when {
+                    factoryType.contains("LinkedBlockingQueue") -> "new java.util.concurrent.LinkedBlockingQueue<>()"
+                    factoryType.contains("ArrayBlockingQueue") -> "new java.util.concurrent.ArrayBlockingQueue<>(16)"
+                    factoryType.contains("PriorityBlockingQueue") -> "new java.util.concurrent.PriorityBlockingQueue<>()"
+                    else -> "new java.util.concurrent.LinkedBlockingQueue<>()" // default fallback
+                }
+            }
+            // Generic types that support diamond operator
+            else -> "new $factoryType<>()"
         }
     }
 
@@ -185,7 +205,12 @@ object CollectionHandler : CommonCollectionHandler() {
                 elementHandler.randomizedValue("${fieldName}_elem_$index", elementFq, elementType)
             }
         } else {
-            listOf("${elementType?.presentableText ?: parseType.rawType}Supplier.configuredBuilder()")
+            // Generate multiple builder elements for complex types (stored as builders)
+            // Use elementFq first, then fallback to parseType.firstGeneric (not rawType!)
+            val elementTypeName = elementFq ?: parseType.firstGeneric ?: "Object"
+            (1..3).map { index ->
+                "${elementTypeName}Supplier.configuredBuilder()"
+            }
         }
 
         return when {
@@ -242,13 +267,17 @@ object CollectionHandler : CommonCollectionHandler() {
         val keyValue = if (keyHandler.isKnown) {
             keyHandler.randomizedValue("${fieldName}_key", keyFq, keyType)
         } else {
-            "${keyType?.presentableText ?: parseType.firstGeneric}Supplier.configuredBuilder()"
+            // Use keyFq first, then fallback to parseType.firstGeneric
+            val keyTypeName = keyFq ?: parseType.firstGeneric ?: "Object"
+            "${keyTypeName}Supplier.configuredBuilder()"
         }
 
         val valueValue = if (valueHandler.isKnown) {
             valueHandler.randomizedValue("${fieldName}_val", valueFq, valueType)
         } else {
-            "${valueType?.presentableText?:parseType.secondGeneric}Supplier.configuredBuilder()"
+            // Use valueFq first, then fallback to parseType.secondGeneric
+            val valueTypeName = valueFq ?: parseType.secondGeneric ?: "Object"
+            "${valueTypeName}Supplier.configuredBuilder()"
         }
 
         return when {
