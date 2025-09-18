@@ -10,6 +10,7 @@ import com.testdata.suppliergen.generator.sections.*
 import com.testdata.suppliergen.model.FieldModel
 import com.testdata.suppliergen.model.GenerationResult
 import com.testdata.suppliergen.model.SupplierClassModel
+import com.testdata.suppliergen.progress.ProgressCallback
 
 class SupplierGenerator(
     private val project: Project
@@ -33,6 +34,7 @@ class SupplierGenerator(
         context: GenerationContext,
         originalFile: PsiJavaFile,
         targetClass: PsiClass,
+        progressCallback: ProgressCallback? = null,
         currentDepth: Int = 0
     ): GenerationResult {
 
@@ -71,6 +73,9 @@ class SupplierGenerator(
         val scope = GlobalSearchScope.allScope(project)
 
         for (field in model.fields) {
+            progressCallback?.incrementField(field.name)
+            progressCallback?.checkCanceled()
+
             val fqTypesToResolve = buildList {
                 if (!field.isKnown) add(field.fqType)
                 if (field.isOptional && !field.optionalInnerIsKnown) field.optionalInnerType?.let(::add)
@@ -88,10 +93,10 @@ class SupplierGenerator(
 
                 val containingFile = resolved.containingFile as? PsiJavaFile
                 val result = if (containingFile != null) {
-                    generateRecursively(context, containingFile, resolved, currentDepth + 1)
+                    generateRecursively(context, containingFile, resolved, progressCallback, currentDepth + 1)
                 } else {
                     // Handle library class without containing file
-                    generateForLibraryClass(context, resolved, currentDepth + 1)
+                    generateForLibraryClass(context, resolved, progressCallback, currentDepth + 1)
                 }
                 dependencies += result.root
                 dependencies += result.dependencies
@@ -145,6 +150,7 @@ class SupplierGenerator(
     private fun generateForLibraryClass(
         context: GenerationContext,
         libraryClass: PsiClass,
+        progressCallback: ProgressCallback? = null,
         currentDepth: Int
     ): GenerationResult {
         logger.debug("Generating supplier for library class: ${libraryClass.qualifiedName}")
@@ -162,6 +168,12 @@ class SupplierGenerator(
         val simpleName = libraryClass.name ?: return GenerationResult(createEmptyJavaFile(), emptyList())
 
         val fieldModels = libraryClassHandler.extractFieldsFromLibraryClass(libraryClass)
+
+        // Track progress for library class fields
+        fieldModels.forEach { field ->
+            progressCallback?.incrementField(field.name)
+            progressCallback?.checkCanceled()
+        }
 
         // For library classes, use the target directory for package resolution
         val packageName = context.targetDir?.let { dir ->
