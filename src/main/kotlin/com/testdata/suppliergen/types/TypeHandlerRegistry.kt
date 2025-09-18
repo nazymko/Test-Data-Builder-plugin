@@ -11,7 +11,13 @@ import com.intellij.psi.PsiType
 object TypeHandlerRegistry {
     // Pattern-based handlers - these should be checked first and sorted by priority
     private val patternBasedHandlers: List<PatternBasedTypeHandler> = listOf(
-        // Financial Securities (Highest Priority)
+        // Crypto & Blockchain (Highest Priority)
+        BitcoinAddressHandler,          // 26
+        EthereumAddressHandler,         // 26
+        WalletIdHandler,                // 25
+        BlockchainHashHandler,          // 24
+
+        // Financial Securities
         ISINTypeHandler,                // 25
         AskPriceTypeHandler,            // 24
         BidPriceTypeHandler,            // 24
@@ -19,12 +25,47 @@ object TypeHandlerRegistry {
         TickerSymbolTypeHandler,        // 22
         CUSIPTypeHandler,               // 21
 
+        // Scientific & Research
+        DOIHandler,                     // 20
+        ResearchIdHandler,              // 19
+        LabSampleHandler,               // 18
+        ChemicalFormulaHandler,         // 17
+        GenomeSequenceHandler,          // 16
+
         // Healthcare & Identity
         PatientIdTypeHandler,           // 20
         InsuranceTypeHandler,           // 19
         PassportTypeHandler,            // 18
         BloodTypeTypeHandler,           // 18
         DriverLicenseTypeHandler,       // 17
+
+        // Legal & Compliance
+        GDPRConsentHandler,             // 18
+        ComplianceIdHandler,            // 17
+        LegalDocumentHandler,           // 16
+        CertificationHandler,           // 15
+
+        // Media & Content
+        ISBN13Handler,                  // 19
+        MimeTypeHandler,                // 18
+        FileExtensionHandler,           // 17
+        ColorCodeHandler,               // 16
+        MediaUrlHandler,                // 15
+
+        // Gaming & Entertainment
+        GameScoreHandler,               // 15
+        PlayerIdHandler,                // 14
+        StreamKeyHandler,               // 13
+        GameAchievementHandler,         // 12
+        GameSessionHandler,             // 11
+
+        // IoT & Devices
+        DeviceIdHandler,                // 15
+        SensorValueHandler,             // 14
+        BatteryLevelHandler,            // 13
+        MachineLearningModelHandler,    // 12
+
+        // Identity & Security
         CreditCardTypeHandler,          // 16
         NationalIdTypeHandler,          // 16
         SSNTypeHandler,                 // 15

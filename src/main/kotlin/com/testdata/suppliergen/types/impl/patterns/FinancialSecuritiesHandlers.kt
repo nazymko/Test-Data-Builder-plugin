@@ -168,6 +168,22 @@ object YieldTypeHandler : PatternBasedTypeHandler {
             "java.math.BigDecimal", "BigDecimal" -> "new java.math.BigDecimal(\"$roundedYield\")"
             "java.lang.Double", "Double", "double" -> roundedYield
             "java.lang.Float", "Float", "float" -> "${roundedYield}f"
+            "java.lang.Long", "Long", "long" -> {
+                // For basis points or integer yield representations
+                if (fieldName.lowercase().contains("basis") || fieldName.lowercase().contains("points")) {
+                    "${(yieldRate * 100).toLong()}L" // Convert percentage to basis points (multiply by 100)
+                } else {
+                    "${yieldRate.toLong()}L" // Truncate to whole number
+                }
+            }
+            "java.lang.Integer", "Integer", "int" -> {
+                // For basis points or integer yield representations
+                if (fieldName.lowercase().contains("basis") || fieldName.lowercase().contains("points")) {
+                    "${(yieldRate * 100).toInt()}" // Convert percentage to basis points (multiply by 100)
+                } else {
+                    "${yieldRate.toInt()}" // Truncate to whole number
+                }
+            }
             else -> roundedYield
         }
     }
