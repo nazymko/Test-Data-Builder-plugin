@@ -11,27 +11,48 @@ import com.intellij.psi.PsiType
 object TypeHandlerRegistry {
     // Pattern-based handlers - these should be checked first and sorted by priority
     private val patternBasedHandlers: List<PatternBasedTypeHandler> = listOf(
-        // Financial & Identity (Highest Priority)
+        // Healthcare & Identity (Highest Priority)
+        PatientIdTypeHandler,           // 20
+        InsuranceTypeHandler,           // 19
+        PassportTypeHandler,            // 18
+        BloodTypeTypeHandler,           // 18
+        DriverLicenseTypeHandler,       // 17
         CreditCardTypeHandler,          // 16
+        NationalIdTypeHandler,          // 16
         SSNTypeHandler,                 // 15
-        PhoneTypeHandler,               // 14
-        PersonalInfoTypeHandler,        // 13
-        IBANTypeHandler,                // 12
-        GenderTypeHandler,              // 11
-        EmailTypeHandler,               // 10
 
-        // Professional & Business
+        // Transportation & Logistics
+        LicensePlateTypeHandler,        // 15
+        PhoneTypeHandler,               // 14
+        VinTypeHandler,                 // 14
+        PersonalInfoTypeHandler,        // 13
+        FlightNumberTypeHandler,        // 13
+        TrackingNumberTypeHandler,      // 12
+        IBANTypeHandler,                // 12
+
+        // Business & Commerce
+        GenderTypeHandler,              // 11
+        SkuTypeHandler,                 // 11
+        OrderNumberTypeHandler,         // 10
+        EmailTypeHandler,               // 10
         JobTitleTypeHandler,            // 9
         SalaryTypeHandler,              // 9
+        CustomerIdTypeHandler,          // 9
+
+        // Professional & Geographic
         CompanyTypeHandler,             // 8
         CurrencyTypeHandler,            // 8
+        ExpirationDateTypeHandler,      // 8
         DepartmentTypeHandler,          // 7
         NameTypeHandler,                // 7
+        TimeZoneTypeHandler,            // 7
 
-        // Geographic & Technical
+        // Technical & Geographic
         CoordinateTypeHandler,          // 6
         AddressTypeHandler,             // 6
+        MacAddressTypeHandler,          // 6
         IPAddressTypeHandler,           // 5
+        DomainTypeHandler,              // 5
         UuidTypeHandler                 // 4
     ).sortedByDescending { it.priority }
 
