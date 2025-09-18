@@ -26,7 +26,7 @@ object ExpirationDateTypeHandler : PatternBasedTypeHandler {
 
 object TimeZoneTypeHandler : PatternBasedTypeHandler {
     private val timezonePatterns = listOf("timezone", "time_zone", "tz", "zone")
-    private val timezones = listOf("America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", "Australia/Sydney", "UTC")
+    private val timezones = listOf("America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Kyiv", "Europe/Paris", "Asia/Tokyo", "Asia/Shanghai", "Australia/Sydney", "UTC")
     override val priority: Int = 7
     override fun supports(fqName: String?, psiType: PsiType?) = fqName == "java.lang.String" || fqName == "String"
     override fun supportsFieldName(fieldName: String, fqName: String?, psiType: PsiType?) = supports(fqName, psiType) && matchesPattern(fieldName, timezonePatterns)

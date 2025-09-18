@@ -11,7 +11,15 @@ import com.intellij.psi.PsiType
 object TypeHandlerRegistry {
     // Pattern-based handlers - these should be checked first and sorted by priority
     private val patternBasedHandlers: List<PatternBasedTypeHandler> = listOf(
-        // Healthcare & Identity (Highest Priority)
+        // Financial Securities (Highest Priority)
+        ISINTypeHandler,                // 25
+        AskPriceTypeHandler,            // 24
+        BidPriceTypeHandler,            // 24
+        YieldTypeHandler,               // 23
+        TickerSymbolTypeHandler,        // 22
+        CUSIPTypeHandler,               // 21
+
+        // Healthcare & Identity
         PatientIdTypeHandler,           // 20
         InsuranceTypeHandler,           // 19
         PassportTypeHandler,            // 18
